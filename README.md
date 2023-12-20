@@ -1,9 +1,9 @@
 # Backend-Go-Ecommerce
 
-Overview
+# Overview
 This project is a backend application for an e-commerce platform developed using the Go programming language with the Fiber web framework and MongoDB as the database.
 
-Features
+# Features
 RESTful API: The backend provides a set of RESTful APIs to handle various functionalities of an e-commerce platform, such as managing products, users, orders, and more.
 
 User Authentication and Authorization: The application supports user registration, login, and authentication using JSON Web Tokens (JWT). Additionally, it implements role-based access control to ensure secure access to different parts of the system.
@@ -16,7 +16,7 @@ Cart Functionality: The application supports shopping cart functionality, allowi
 
 Middleware: Custom middleware functions are implemented to handle tasks such as logging, error handling, and authentication verification.
 
-Technology Stack
+# Technology Stack
 Go: The programming language used for the backend development.
 Fiber: A fast and lightweight web framework for Go, used for building the RESTful API.
 MongoDB: The NoSQL database used to store and retrieve data efficiently.
