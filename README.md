@@ -18,6 +18,6 @@ This project is a backend application for an e-commerce platform developed using
 ## Technology Stack
 - **Backend (Go):**
 - Go: The programming language used for the backend development.
-- Fiber: A fast and lightweight web framework for Go, used for building the RESTful API.
+- [Fiber]: A fast and lightweight web framework for Go, used for building the RESTful API.
 - MongoDB: The NoSQL database used to store and retrieve data efficiently.
 - Other Go Libraries: Various third-party Go libraries are utilized for tasks such as database interaction, validation, and error handling.
