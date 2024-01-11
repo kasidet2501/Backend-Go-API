@@ -62,6 +62,7 @@ func CreateProduct(c *fiber.Ctx) error {
 	product.Image = fullPath
 	// End save file image
 
+	
 	// Test save Image
 
 	// full,err := Uploadfile(c);

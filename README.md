@@ -2,19 +2,13 @@
 
 ## Overview
 
-This project is a backend application for an e-commerce platform developed using the Go programming language with the Fiber web framework and MongoDB as the database.
+This repository contains a Gofiber-based backend API for a product management system. The API is designed to perform CRUD operations (Create, Read, Update, Delete) on products and is integrated with a MongoDB database.
 
 ## Features
 
 - [RESTful API]() - The backend provides a set of RESTful APIs to handle various functionalities of an e-commerce platform, such as managing products, users, orders, and more.
 
-- [User Authentication and Authorization]() - The application supports user registration, login, and authentication.
-
 - [Product Management]() - The backend allows administrators to manage products, including adding new products, updating existing ones, and deleting products.
-
-- [Order Processing]() - Users can place orders, and the system handles order processing, including order creation, order status updates, and order history.
-
-- [Cart Functionality]() - The application supports shopping cart functionality, allowing users to add products to their carts, update quantities, and proceed to checkout.
 
 ## Technology Stack
 
