@@ -6,7 +6,7 @@ This repository contains a Gofiber-based backend API for a product management sy
 
 ## Features
 
-- [RESTful API]() - The backend provides a set of RESTful APIs to handle various functionalities of an e-commerce platform, such as managing products, users, orders, and more.
+- [RESTful API]() - The backend provides a set of RESTful APIs to handle various functionalities such as managing products.
 
 - [Product Management]() - The backend allows administrators to manage products, including adding new products, updating existing ones, and deleting products.
 
