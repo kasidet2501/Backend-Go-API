@@ -36,7 +36,6 @@ func CreateProduct(c *fiber.Ctx) error {
 			Message:  "error", 
 			Data: &fiber.Map{"data": err.Error()}})
 	}
-
 	
 	// Save file image
 	file,err := c.FormFile("image")
@@ -62,6 +61,13 @@ func CreateProduct(c *fiber.Ctx) error {
 
 	product.Image = fullPath
 	// End save file image
+
+	// Test save Image
+
+	// full,err := Uploadfile(c);
+	// fmt.Print(full)
+
+	// End Test save Image
 
 
 	//use the validate library to validate required fields
@@ -237,30 +243,30 @@ func DeleteProduct(c *fiber.Ctx) error{
 		Data: &fiber.Map{"data": "Product successfully deleted!"}})
 }
 
-// func Uploadfile(c *fiber.Ctx) error{
-// 	// Parse form data
-// 	file,err := c.FormFile("image")
+func Uploadfile(c *fiber.Ctx) (string ,error){
+	// Parse form data
+	file,err := c.FormFile("image")
 
-// 	if err != nil{
-// 		return c.Status(http.StatusBadRequest).JSON(responses.ResponseData{
-// 			Status: http.StatusBadRequest, 
-// 			Message:  "error", 
-// 			Data: &fiber.Map{"data": err.Error()}})
-// 	}
+	if err != nil{
+		return "",c.Status(http.StatusBadRequest).JSON(responses.ResponseData{
+			Status: http.StatusBadRequest, 
+			Message:  "error", 
+			Data: &fiber.Map{"data": err.Error()}})
+	}
 
-// 	// Generate a new random filename
-// 	newFilename := uuid.New().String() + filepath.Ext(file.Filename)
-// 	var fullPath = "../public/uploads/" + newFilename
+	// Generate a new random filename
+	newFilename := uuid.New().String() + filepath.Ext(file.Filename)
+	var fullPath = "../public/uploads/" + newFilename
 
-// 	errSaveFile := 	c.SaveFile(file,fullPath)
-// 	if errSaveFile != nil{
-// 		return c.Status(http.StatusInternalServerError).JSON(responses.ResponseData{
-// 			Status: http.StatusInternalServerError, 
-// 			Message:  "error", 
-// 			Data: &fiber.Map{"data": errSaveFile.Error()}})
-// 	}
+	errSaveFile := 	c.SaveFile(file,fullPath)
+	if errSaveFile != nil{
+		return "",c.Status(http.StatusInternalServerError).JSON(responses.ResponseData{
+			Status: http.StatusInternalServerError, 
+			Message:  "error", 
+			Data: &fiber.Map{"data": errSaveFile.Error()}})
+	}
 
-// 	// return fullPath
-// 	return c.SendString(fullPath)
-// }
+	// return fullPath
+	return fullPath, c.SendString(fullPath);
+}
 
