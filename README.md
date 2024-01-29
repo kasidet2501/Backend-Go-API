@@ -1,4 +1,4 @@
-# Backend-Go-Ecommerce
+# Backend-Go-API
 
 ## Overview
 
