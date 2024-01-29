@@ -15,6 +15,7 @@ func main() {
 
 	//routes
 	routes.ProductsRoute(app)
+	routes.UsersRoute(app)
 
     // app.Get("/", func(c *fiber.Ctx) error {
     //     return c.JSON(&fiber.Map{"data": "Hello from Fiber & mongoDB"})

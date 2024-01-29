@@ -18,8 +18,8 @@ import (
 )
 
 var ProductCollection *mongo.Collection = configs.GetCollection(configs.DB,"products")
-var UserCollection *mongo.Collection = configs.GetCollection(configs.DB,"user")
-var CartCollection *mongo.Collection = configs.GetCollection(configs.DB,"cart")
+var UserCollection *mongo.Collection = configs.GetCollection(configs.DB,"users")
+var CartCollection *mongo.Collection = configs.GetCollection(configs.DB,"carts")
 
 var validate = validator.New()
 
@@ -167,7 +167,7 @@ func EditProduct (c *fiber.Ctx) error{
 			Data: &fiber.Map{"data": err.Error()}})
 	}
 
-	//get updated user details
+	//get updated product details
 	var UpdateProduct models.Product
 	if result.MatchedCount == 1 {
         err := ProductCollection.FindOne(ctx, bson.M{"id": ObjId}).Decode(&UpdateProduct)

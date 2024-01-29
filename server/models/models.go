@@ -26,18 +26,19 @@ type Address struct {
 }
 
 type Name struct {
-	Firstname 	string 		`json:"firstname" validate:"required"`
-	Lastname  	string 		`json:"lastname"  validate:"required"`
+	Firstname 	string 		`json:"firstname,omitempty" validate:"required"`
+	Lastname  	string 		`json:"lastname,omitempty"  validate:"required"`
 }
 
 type User struct {
+	Id       	primitive.ObjectID     	`json:"id,omitempty"`
+	Role		string		`json:"role,omitempty" validate:"required"`
 	Address  	Address 	`json:"address"`
-	Id       	primitive.ObjectID     	`json:"id"`
-	Email    	string  	`json:"email" validate:"required"`
-	Username 	string  	`json:"username" validate:"required"`
-	Password 	string  	`json:"password" validate:"required"`
-	Name     	Name    	`json:"name" validate:"required"`
-	Phone    	string  	`json:"phone" validate:"required"`
+	Email    	string  	`json:"email,omitempty" validate:"required"`
+	Username 	string  	`json:"username,omitempty" validate:"required"`
+	Password 	string  	`json:"password,omitempty" validate:"required"`
+	Name     	Name    	`json:"name,omitempty" validate:"required"`
+	Phone    	string  	`json:"phone,omitempty" validate:"required"`
 }
 
 
