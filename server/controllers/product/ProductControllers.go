@@ -23,6 +23,7 @@ var CartCollection *mongo.Collection = configs.GetCollection(configs.DB,"carts")
 
 var validate = validator.New()
 
+// -----------------> Create Product <----------------- //
 func CreateProduct(c *fiber.Ctx) error {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -104,7 +105,38 @@ func CreateProduct(c *fiber.Ctx) error {
 }
 
 
-func GetProduct (c *fiber.Ctx) error{
+// -----------------> Get  All Products <----------------- //
+func GetProduct(c *fiber.Ctx) error{
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	var products []models.Product
+	defer cancel()
+
+	// Find all documents in the collection
+	cursor, err := ProductCollection.Find(ctx, bson.D{})
+	if err != nil {
+		return err
+	}
+	defer cursor.Close(ctx)
+
+	// Iterate over the cursor and decode each document into the Product struct
+	for cursor.Next(ctx) {
+		var product models.Product
+		if err := cursor.Decode(&product); err != nil {
+			return err
+		}
+		products = append(products, product)
+	}
+
+
+	return c.Status(http.StatusOK).JSON(responses.ResponseData{
+		Status: http.StatusOK, 
+		Message:  "success", 
+		Data: &fiber.Map{"data": products}})
+	 
+}
+
+// -----------------> Get Product by ID <----------------- //
+func GetProductById (c *fiber.Ctx) error{
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	ProductId := c.Params("id")
 	var product models.Product
@@ -127,6 +159,7 @@ func GetProduct (c *fiber.Ctx) error{
 		Data: &fiber.Map{"data": product}})
 }
 
+// -----------------> Edit Product <----------------- //
 func EditProduct (c *fiber.Ctx) error{
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	ProductId := c.Params("id")
@@ -186,6 +219,8 @@ func EditProduct (c *fiber.Ctx) error{
 	})
 }
 
+
+// -----------------> Delete Product <----------------- //
 func DeleteProduct(c *fiber.Ctx) error{
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	ProductId := c.Params("id")

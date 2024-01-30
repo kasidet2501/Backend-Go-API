@@ -6,6 +6,12 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
+// Login Struct
+type LoginRequest struct {
+	Username    string `json:"username"`
+	Password 	string `json:"password"`
+  }
+
 // Product Struct
 type Product struct{
 	Id 			primitive.ObjectID `json:"id,omitempty"`
@@ -18,12 +24,7 @@ type Product struct{
 
 
 // User Struct
-type Address struct {
-	City        string      `json:"city"`
-	Street      string      `json:"street"`
-	Number      int         `json:"number"`
-	Zipcode     string      `json:"zipcode"`
-}
+
 
 type Name struct {
 	Firstname 	string 		`json:"firstname,omitempty" validate:"required"`
@@ -33,7 +34,6 @@ type Name struct {
 type User struct {
 	Id       	primitive.ObjectID     	`json:"id,omitempty"`
 	Role		string		`json:"role,omitempty" validate:"required"`
-	Address  	Address 	`json:"address"`
 	Email    	string  	`json:"email,omitempty" validate:"required"`
 	Username 	string  	`json:"username,omitempty" validate:"required"`
 	Password 	string  	`json:"password,omitempty" validate:"required"`

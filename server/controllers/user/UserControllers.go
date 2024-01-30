@@ -19,7 +19,38 @@ import (
 var UserCollection *mongo.Collection = configs.GetCollection(configs.DB,"users")
 var validate = validator.New()
 
+// -----------------> Get  All users <----------------- //
 func GetUser(c *fiber.Ctx) error{
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	var users []models.User
+	defer cancel()
+
+	// Find all documents in the collection
+	cursor, err := UserCollection.Find(ctx, bson.D{})
+	if err != nil {
+		return err
+	}
+	defer cursor.Close(ctx)
+
+	// Iterate over the cursor and decode each document into the User struct
+	for cursor.Next(ctx) {
+		var user models.User
+		if err := cursor.Decode(&user); err != nil {
+			return err
+		}
+		users = append(users, user)
+	}
+
+
+	return c.Status(http.StatusOK).JSON(responses.ResponseData{
+		Status: http.StatusOK, 
+		Message:  "success", 
+		Data: &fiber.Map{"data": users}})
+	 
+}
+
+// -----------------> Get User By ID <----------------- //
+func GetUserByID(c *fiber.Ctx) error{
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	UserId := c.Params("id")
 	var user models.User
@@ -27,11 +58,12 @@ func GetUser(c *fiber.Ctx) error{
 
 	ObjId,_ := primitive.ObjectIDFromHex(UserId)
 
+	// err := UserCollection.FindOne(ctx, bson.M{"username" : UserId}).Decode(&user)
 	err := UserCollection.FindOne(ctx, bson.M{"id" : ObjId}).Decode(&user)
 
 	if err != nil{
 		return c.Status(http.StatusInternalServerError).JSON(responses.ResponseData{
-			Status: http.StatusCreated, 
+			Status: http.StatusInternalServerError, 
 			Message:  "error", 
 			Data: &fiber.Map{"data": err.Error()}})
 	
@@ -53,11 +85,13 @@ func CheckPasswordHash(password, hash string) bool {
     return err == nil
 }
 
+
+// -----------------> Create User <----------------- //
 func CreateUser(c *fiber.Ctx) error{
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	var user models.User
 	defer cancel()
-	
+
 	//validate the request body
 	if err:= c.BodyParser(&user); err != nil{
 		return c.Status(http.StatusBadRequest).JSON(responses.ResponseData{
@@ -65,6 +99,25 @@ func CreateUser(c *fiber.Ctx) error{
 			Message:  "error", 
 			Data: &fiber.Map{"data": err.Error()}})
 	}
+
+	// Example: Check if username is unique before inserting or updating
+	err := UserCollection.FindOne(ctx, bson.M{"username": user.Username}).Decode(&user)
+	if err == nil {
+		return c.Status(http.StatusBadRequest).JSON(responses.ResponseData{
+			Status: http.StatusBadRequest, 
+			Message:  "error",
+			Data: &fiber.Map{"data": "Username is already used"}})
+	} 
+
+	// Example: Check if email is unique before inserting or updating
+	err = UserCollection.FindOne(ctx, bson.M{"email": user.Email}).Decode(&user);
+	if err == nil {
+		return c.Status(http.StatusBadRequest).JSON(responses.ResponseData{
+			Status: http.StatusBadRequest, 
+			Message:  "error",
+			Data: &fiber.Map{"data": "Email is already used"}})
+	} 
+
 
 	//use the validate library to validate required fields
 	if validationErr := validate.Struct(&user); validationErr != nil{
@@ -100,7 +153,7 @@ func CreateUser(c *fiber.Ctx) error{
 	
 }
 
-
+// -----------------> Update User <----------------- //
 func EditUser(c *fiber.Ctx) error{
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	UserId := c.Params("id")
@@ -111,7 +164,7 @@ func EditUser(c *fiber.Ctx) error{
 
 	if err := c.BodyParser(&user) ; err != nil{
 		return c.Status(http.StatusBadRequest).JSON(responses.ResponseData{
-			Status: http.StatusCreated, 
+			Status: http.StatusBadRequest, 
 			Message:  "error", 
 			Data: &fiber.Map{"data": err.Error()}})
 	}
@@ -124,14 +177,10 @@ func EditUser(c *fiber.Ctx) error{
 			Data: &fiber.Map{"data": validationErr.Error()}})
 	}
 
+	//new feature : Check Username and password if they are duplicate in another user then return a badrequest
+
 	update := bson.M{
 		"role" : user.Role,
-  		"address": bson.M{
-			"city": user.Address.City,
-			"street": user.Address.Street,
-			"number": user.Address.Number,
-			"zipcode": user.Address.Zipcode,
-		},
 		"email": user.Email,
 		"username": user.Username,
 		"password": user.Password,
@@ -170,6 +219,9 @@ func EditUser(c *fiber.Ctx) error{
 	})
 	
 }
+
+
+// -----------------> Delete User <----------------- //
 func DeleteUser(c *fiber.Ctx) error{
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	UserId := c.Params("id")
