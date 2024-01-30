@@ -12,6 +12,8 @@ import (
 
 
 func ProductsRoute(app *fiber.App){
+
+	// -------------------> Routes for Admin role <------------------------
 	// Group routes under /product
 	ProductGroup := app.Group("/product")
 
@@ -24,6 +26,17 @@ func ProductsRoute(app *fiber.App){
 	ProductGroup.Put("/:id", product.EditProduct)
 	ProductGroup.Delete("/:id", product.DeleteProduct)
 	// app.Post("/upload", product.Uploadfile)
+
+
+	// -------------------> Routes for User role <------------------------
+	// Group routes under /product
+	UserProductGroup := app.Group("/user")
+
+	// Apply the isAdmin middleware only to the /product routes
+	UserProductGroup.Use(isUser)
+
+	UserProductGroup.Get("/product", product.GetProduct)
+	UserProductGroup.Get("/product/:id", product.GetProductById)
 }
 func UsersRoute(app *fiber.App){
 

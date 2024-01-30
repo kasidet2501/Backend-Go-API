@@ -18,6 +18,17 @@ func isAdmin(c *fiber.Ctx) error {
 	return c.Next()
 }
 
+// isAdmin checks if the user is a User
+func isUser(c *fiber.Ctx) error {
+	user := c.Locals(userContextKey).(*UserData)
+  
+	if user.Role != "user" {
+	  return fiber.ErrUnauthorized
+	}
+  
+	return c.Next()
+}
+
 // UserData represents the user data extracted from the JWT token
 type UserData struct {
 	Username string
