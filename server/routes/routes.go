@@ -2,6 +2,7 @@ package routes
 
 import (
 	"backend-ecom/controllers/authlogin"
+	"backend-ecom/controllers/cart"
 	"backend-ecom/controllers/product"
 	"backend-ecom/controllers/user"
 	"os"
@@ -52,6 +53,17 @@ func UsersRoute(app *fiber.App){
 	userGroup.Put("/:id", user.EditUser)
 	userGroup.Delete("/:id", user.DeleteUser)
 	// app.Post("/upload", product.Uploadfile)
+}
+
+func OrderRoute(app *fiber.App){
+	// Group routes under /user
+	OrderGroup := app.Group("/order")
+
+	// Apply the isAdmin middleware only to the /product routes
+	OrderGroup.Use(isUser)
+
+	OrderGroup.Post("/", cart.AddToCart)
+
 }
 
 func LoginRoute(app *fiber.App){

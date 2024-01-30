@@ -19,7 +19,7 @@ import (
 
 var ProductCollection *mongo.Collection = configs.GetCollection(configs.DB,"products")
 var UserCollection *mongo.Collection = configs.GetCollection(configs.DB,"users")
-var CartCollection *mongo.Collection = configs.GetCollection(configs.DB,"carts")
+var OrderCollection *mongo.Collection = configs.GetCollection(configs.DB,"orders")
 
 var validate = validator.New()
 

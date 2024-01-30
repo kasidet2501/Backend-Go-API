@@ -10,7 +10,7 @@ This project is a backend application for an e-commerce platform developed using
 
 - [Product Management]() - The backend allows administrators to manage products, including adding new products, updating existing ones, and deleting products.
 
-- [User Management]() - Perform CRUD (Create, Read, Update, Delete) operations on user entities.
+- [User Management]() - User Authentication and Authorization: The application supports user registration, login, and authentication using JSON Web Tokens (JWT). Additionally, it implements role-based access control to ensure secure access to different parts of the system.
 
 ## Technology Stack
 

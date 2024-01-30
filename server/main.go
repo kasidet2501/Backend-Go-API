@@ -17,6 +17,7 @@ func main() {
 	routes.LoginRoute(app)
 	routes.ProductsRoute(app)
 	routes.UsersRoute(app)
+	routes.OrderRoute(app)
 	
 
     // app.Get("/", func(c *fiber.Ctx) error {

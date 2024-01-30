@@ -33,7 +33,7 @@ func isUser(c *fiber.Ctx) error {
 type UserData struct {
 	Username string
 	Role  string
-  }
+}
   
 // userContextKey is the key used to store user data in the Fiber context
 const userContextKey = "user"

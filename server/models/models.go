@@ -1,8 +1,6 @@
 package models
 
 import (
-	"time"
-
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -43,14 +41,14 @@ type User struct {
 
 
 //Cart
-type Cart struct {
-	ProductID int 		`json:"productId"`
+type CartItem struct {
+	ProductID string 	`json:"productId"`
 	Quantity  int 		`json:"quantity"`
 }
 
 type Order struct {
-	ID       int       `json:"id"`
-	UserID   int       `json:"userId"`
-	Date     time.Time `json:"date"`
-	Carts 	 []Cart    `json:"carts"`
+	Id       primitive.ObjectID     	`json:"id,omitempty"`
+	Username string       	`json:"username"`
+	// Date     time.Time 		`json:"date"`
+	Carts 	 map[string]CartItem     `json:"carts"`
 }
