@@ -60,14 +60,22 @@ func Login(secretKey string) fiber.Handler {
 		claims := token.Claims.(jwt.MapClaims)
 		claims["username"] = user.Username
 		claims["role"] = user.Role
-		claims["exp"] = time.Now().Add(time.Hour * 72).Unix()
+		claims["exp"] = time.Now().Add(time.Hour * 24).Unix()
+
 	
 		// Generate encoded token
 		t, err := token.SignedString([]byte(secretKey))
 		if err != nil {
 		  return c.SendStatus(fiber.StatusInternalServerError)
 		}
-	
+
+		c.Cookie(&fiber.Cookie{
+			Name:     "jwt",
+			Value:    t,
+			Expires:  time.Now().Add(time.Hour * 24),
+			HTTPOnly: true,
+		})
+
 		return c.JSON(fiber.Map{
 			"Message": "Login success",
 			"token": t})

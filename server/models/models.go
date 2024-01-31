@@ -31,7 +31,7 @@ type Name struct {
 
 type User struct {
 	Id       	primitive.ObjectID     	`json:"id,omitempty"`
-	Role		string		`json:"role,omitempty" validate:"required"`
+	Role		string		`json:"role,omitempty" validate:"required" `
 	Email    	string  	`json:"email,omitempty" validate:"required"`
 	Username 	string  	`json:"username,omitempty" validate:"required"`
 	Password 	string  	`json:"password,omitempty" validate:"required"`
@@ -44,11 +44,18 @@ type User struct {
 type CartItem struct {
 	ProductID string 	`json:"productId"`
 	Quantity  int 		`json:"quantity"`
+	Price 	  float64		`json:"price"`
 }
 
 type Order struct {
-	Id       primitive.ObjectID     	`json:"id,omitempty"`
-	Username string       	`json:"username"`
+	Id       primitive.ObjectID     `json:"id,omitempty"`
+	Username string       			`json:"username"`
+	Carts 	 []CartItem     		`json:"carts"`
+	Price 	 float64				`json:"price"`	
 	// Date     time.Time 		`json:"date"`
-	Carts 	 map[string]CartItem     `json:"carts"`
+}
+
+type UserData struct {
+	Username string `json:"username"`
+	Role   string `json:"role"`
 }

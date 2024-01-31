@@ -14,15 +14,14 @@ func main() {
 	configs.ConnectDB()
 
 	//routes
+	routes.RegisterRoute(app)
 	routes.LoginRoute(app)
+	routes.LogoutRoute(app)
 	routes.ProductsRoute(app)
 	routes.UsersRoute(app)
+	routes.CartRoute(app)
 	routes.OrderRoute(app)
 	
-
-    // app.Get("/", func(c *fiber.Ctx) error {
-    //     return c.JSON(&fiber.Map{"data": "Hello from Fiber & mongoDB"})
-    // })
 
     app.Listen(":6000")
 }
