@@ -6,11 +6,17 @@ This project is a backend application for an e-commerce platform developed using
 
 ## Features
 
-- [RESTful API]() - The backend provides a set of RESTful APIs to handle various functionalities such as managing products, users.
+- [RESTful API]() - The backend provides a set of RESTful APIs to handle various functionalities such as managing products, users and orders.
 
 - [Product Management]() - The backend allows administrators to manage products, including adding new products, updating existing ones, and deleting products.
 
 - [User Management]() - User Authentication and Authorization: The application supports user registration, login, and authentication using JSON Web Tokens (JWT). Additionally, it implements role-based access control to ensure secure access to different parts of the system.
+
+- [Order Processing]() - Users can place orders, and the system handles order processing, including order creation, and order history.
+
+- [Cart Functionality]() - The application supports shopping cart functionality, allowing users to add products to their carts and update quantities.
+
+- [Middleware]() - Custom middleware functions are used to handle tasks such as access authentication.
 
 ## Technology Stack
 
