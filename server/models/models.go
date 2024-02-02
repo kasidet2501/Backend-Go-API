@@ -52,7 +52,7 @@ type Order struct {
 	Username string       			`json:"username"`
 	Carts 	 []CartItem     		`json:"carts"`
 	Price 	 float64				`json:"price"`	
-	// Date     time.Time 		`json:"date"`
+	Date     string 		`json:"date"`
 }
 
 type UserData struct {

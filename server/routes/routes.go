@@ -66,6 +66,7 @@ func CartRoute(app *fiber.App){
 
 	CartGroup.Post("/", cart.AddToCart)
 	CartGroup.Post("/reduce", cart.ReduceQuantity)
+	CartGroup.Delete("/:id", cart.DeleteItem)
 
 }
 func OrderRoute(app *fiber.App){

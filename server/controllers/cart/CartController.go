@@ -90,6 +90,35 @@ func CheckPrice(productId string, c *fiber.Ctx) (float64, error) {
 	return float64(product.Price), nil
 }
 
+func DeleteItem(c *fiber.Ctx) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	CartId := c.Params("id")
+	defer cancel()
+
+	result,err := CartCollection.DeleteOne(ctx, bson.M{"productId" : CartId})
+	if err != nil{
+		return c.Status(http.StatusNotFound).JSON(responses.ResponseData{
+			Status: http.StatusInternalServerError, 
+			Message:  "error", 
+			Data: &fiber.Map{"data": err.Error()}})
+	}
+
+	if result.DeletedCount < 1 {
+		messageError := "Cart Item ID : "+CartId+" not found!"
+		return c.Status(http.StatusInternalServerError).JSON(responses.ResponseData{
+			Status: http.StatusInternalServerError, 
+			Message:  "error", 
+			Data: &fiber.Map{"data": messageError}})
+	}
+
+	messageSuccess := "Cart Item ID : " + CartId + " successfully deleted!"
+	return c.Status(http.StatusOK).JSON(responses.ResponseData{
+		Status: http.StatusOK, 
+		Message:  "success", 
+		Data: &fiber.Map{"data": messageSuccess}})
+
+}
+
 func increaseQuantity(productId string,price float64, c *fiber.Ctx) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()

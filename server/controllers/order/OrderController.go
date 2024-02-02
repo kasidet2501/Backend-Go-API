@@ -68,24 +68,43 @@ func ConfirmOrder(c *fiber.Ctx) error{
 	filter := bson.M{"username": usernameJWT}
 	var order models.Order
 	err := OrderCollection.FindOne(ctx, filter).Decode(&order)
-	if err == mongo.ErrNoDocuments {
-		// กรณีไม่พบ Order ใน MongoDB
-		price:= GetSumPrice() // Sum total price
-		order = models.Order{
-			Id: primitive.NewObjectID(),
-			Username:  usernameJWT,
-			Carts: carts,
-			Price: price,
-		}
-		_, err := OrderCollection.InsertOne(ctx, order)
-		if err != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to add item to cart"})
-		}
-	} else if err != nil {
-		// กรณีเกิด error อื่น ๆ
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to fetch order"})
+
+
+	// Check if nothing in the cart
+	// ใช้ CountDocuments เพื่อนับจำนวนเอกสารทั้งหมดใน Collection
+	count, err := CartCollection.CountDocuments(ctx, bson.M{})
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to count item in cart"})
 	}
-	
+	// ถ้าไม่มีเอกสาร
+	if count == 0 {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Unable to confirm order because you do not have any products in your shopping cart."})
+	}
+
+	//format time
+	currentTime := time.Now()
+	formattedTime := currentTime.Format("2006-01-02 15:04:05")
+
+	// กรณีไม่พบ Order ใน MongoDB
+	price:= GetSumPrice() // Sum total price
+	order = models.Order{
+		Id: primitive.NewObjectID(),
+		Username:  usernameJWT,
+		Carts: carts,
+		Price: price,
+		Date: formattedTime,
+	}
+	// insert Cart item into Order
+	_, err = OrderCollection.InsertOne(ctx, order)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to add item to cart"})
+	}
+
+	// Clear item in Cart
+	if _, err := CartCollection.DeleteMany(ctx, bson.M{}); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to clear item in cart"})
+	}
+
 	return c.JSON(fiber.Map{"data": order})
 }
 
