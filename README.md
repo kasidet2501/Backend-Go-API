@@ -27,6 +27,7 @@ This project is a backend application for an e-commerce platform developed using
   - [MongoDB]() - The NoSQL database used to store and retrieve data efficiently.
   - [Other Go Libraries]() - Various third-party Go libraries are utilized for tasks such as database interaction, validation, and error handling.
 
-  - **Frontend (React):**
+- **Frontend (React):**
+
   - [React](https://reactjs.org/) - JavaScript library for building user interfaces
   - [axios](https://github.com/axios/axios) - HTTP client for making requests to the backend
