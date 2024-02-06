@@ -5,6 +5,7 @@ import (
 	"backend-ecom/models"
 	"backend-ecom/responses"
 	"context"
+	"encoding/json"
 	"net/http"
 	"path/filepath"
 	"time"
@@ -38,47 +39,47 @@ func CreateProduct(c *fiber.Ctx) error {
 			Data: &fiber.Map{"data": err.Error()}})
 	}
 	
-	// Save file image
-	file,err := c.FormFile("image")
+	// // Save file image
+	// file,err := c.FormFile("image")
 
-	if err != nil{
-		return c.Status(http.StatusBadRequest).JSON(responses.ResponseData{
-			Status: http.StatusBadRequest, 
-			Message:  "error", 
-			Data: &fiber.Map{"data": err.Error()}})
-	}
+	// if err != nil{
+	// 	return c.Status(http.StatusBadRequest).JSON(responses.ResponseData{
+	// 		Status: http.StatusBadRequest, 
+	// 		Message:  "error", 
+	// 		Data: &fiber.Map{"data": err.Error()}})
+	// }
 
-	// Generate a new random filename
-	newFilename := uuid.New().String() + filepath.Ext(file.Filename)
-	var fullPath = "../public/uploads/" + newFilename
+	// // Generate a new random filename
+	// newFilename := uuid.New().String() + filepath.Ext(file.Filename)
+	// var fullPath = "../client/src/images/" + newFilename
 
-	errSaveFile := 	c.SaveFile(file,fullPath)
-	if errSaveFile != nil{
-		return c.Status(http.StatusInternalServerError).JSON(responses.ResponseData{
-			Status: http.StatusInternalServerError, 
-			Message:  "error", 
-			Data: &fiber.Map{"data": errSaveFile.Error()}})
-	}
+	// errSaveFile := 	c.SaveFile(file,fullPath)
+	// if errSaveFile != nil{
+	// 	return c.Status(http.StatusInternalServerError).JSON(responses.ResponseData{
+	// 		Status: http.StatusInternalServerError, 
+	// 		Message:  "error", 
+	// 		Data: &fiber.Map{"data": errSaveFile.Error()}})
+	// }
 
-	product.Image = fullPath
-	// End save file image
+	// product.Image = fullPath
+	// // End save file image
 
 	
-	// Test save Image
+	// // Test save Image
 
-	// full,err := Uploadfile(c);
-	// fmt.Print(full)
+	// // full,err := Uploadfile(c);
+	// // fmt.Print(full)
 
-	// End Test save Image
+	// // End Test save Image
 
 
-	//use the validate library to validate required fields
-	if validationErr := validate.Struct(&product); validationErr != nil{
-		return c.Status(http.StatusBadRequest).JSON(responses.ResponseData{
-			Status: http.StatusBadRequest, 
-			Message:  "error", 
-			Data: &fiber.Map{"data": validationErr.Error()}})
-	}
+	// //use the validate library to validate required fields
+	// if validationErr := validate.Struct(&product); validationErr != nil{
+	// 	return c.Status(http.StatusBadRequest).JSON(responses.ResponseData{
+	// 		Status: http.StatusBadRequest, 
+	// 		Message:  "error", 
+	// 		Data: &fiber.Map{"data": validationErr.Error()}})
+	// }
 
 
 	newProduct := models.Product{
@@ -87,7 +88,7 @@ func CreateProduct(c *fiber.Ctx) error {
 		Price: 		product.Price,		
 		Description: product.Description,
 		Category: 	product.Category,
-		Image: 		fullPath,
+		Image: 		product.Image,
 	}
 
 	result, err := ProductCollection.InsertOne(ctx, newProduct)
@@ -98,7 +99,7 @@ func CreateProduct(c *fiber.Ctx) error {
 			Data: &fiber.Map{"data": err.Error()}})
 	}
 
-	return c.Status(http.StatusCreated).JSON(responses.ResponseData{
+	return c.Status(200).JSON(responses.ResponseData{
 		Status: http.StatusCreated, 
 		Message:  "success", 
 		Data: &fiber.Map{"data": result}})
@@ -127,11 +128,9 @@ func GetProduct(c *fiber.Ctx) error{
 		products = append(products, product)
 	}
 
+	jsonProducts, err := json.Marshal(products)
 
-	return c.Status(http.StatusOK).JSON(responses.ResponseData{
-		Status: http.StatusOK, 
-		Message:  "success", 
-		Data: &fiber.Map{"data": products}})
+	return c.Status(200).SendString(string(jsonProducts))
 	 
 }
 
@@ -153,10 +152,9 @@ func GetProductById (c *fiber.Ctx) error{
 			Data: &fiber.Map{"data": err.Error()}})
 	
 	}
-	return c.Status(http.StatusOK).JSON(responses.ResponseData{
-		Status: http.StatusCreated, 
-		Message:  "success", 
-		Data: &fiber.Map{"data": product}})
+	jsonProduct, err := json.Marshal(product)
+
+	return c.Status(200).SendString(string(jsonProduct))
 }
 
 // -----------------> Edit Product <----------------- //
@@ -170,7 +168,7 @@ func EditProduct (c *fiber.Ctx) error{
 
 	if err := c.BodyParser(&product) ; err != nil{
 		return c.Status(http.StatusBadRequest).JSON(responses.ResponseData{
-			Status: http.StatusCreated, 
+			Status: http.StatusBadRequest, 
 			Message:  "error", 
 			Data: &fiber.Map{"data": err.Error()}})
 	}
@@ -229,34 +227,6 @@ func DeleteProduct(c *fiber.Ctx) error{
 
 	ObjId,_ := primitive.ObjectIDFromHex(ProductId)
 
-	// Delete image from folder
-
-	// err := ProductCollection.FindOne(ctx, bson.M{"id" : ObjId}).Decode(&product)
-
-	// if err != nil{
-	// 	return c.Status(http.StatusInternalServerError).JSON(responses.ResponseData{
-	// 		Status: http.StatusCreated, 
-	// 		Message:  "error", 
-	// 		Data: &fiber.Map{"data": err.Error()}})
-	
-	// }
-
-	// // ตรวจสอบว่าไฟล์หรือโฟลเดอร์นั้นมีอยู่จริงหรือไม่
-	// if _, err := os.Stat(product.Image); os.IsNotExist(err) {
-	// 	// ถ้าไม่มี, ส่ง HTTP response กลับไปว่าไม่พบไฟล์หรือโฟลเดอร์
-	// 	return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-	// 		"error": "File or directory not found",
-	// 	})
-	// }
-
-	// // ลบไฟล์หรือโฟลเดอร์
-	// // err := os.Remove(product.Image)
-	// if err = os.Remove(product.Image); err != nil {
-	// 	// ถ้าเกิดข้อผิดพลาดในการลบ, ส่ง HTTP response กลับไปว่าเกิดข้อผิดพลาด
-	// 	return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-	// 		"error": fmt.Sprintf("Error deleting file: %s", err.Error()),
-	// 	})
-	// }
 
 	result,err := ProductCollection.DeleteOne(ctx, bson.M{"id" : ObjId})
 	if err != nil{
@@ -273,7 +243,7 @@ func DeleteProduct(c *fiber.Ctx) error{
 			Data: &fiber.Map{"data": "Product with specified ID not found!"}})
 	}
 
-	return c.Status(http.StatusOK).JSON(responses.ResponseData{
+	return c.Status(200).JSON(responses.ResponseData{
 		Status: http.StatusOK, 
 		Message:  "success", 
 		Data: &fiber.Map{"data": "Product successfully deleted!"}})

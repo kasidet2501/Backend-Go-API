@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -21,24 +22,50 @@ const userContextKey = "user"
 // isAdmin checks if the user is an admin
 func isAdmin(c *fiber.Ctx) error {
 
-	if CheckRole(c) != "admin" {
+	user := c.Locals(userContextKey).(*UserData)
+	if user.Role != "admin"{
 		return fiber.ErrUnauthorized
-	  }
-	
-	  return c.Next()
+	}
+
+	return c.Next()
 }
 
 // isAdmin checks if the user is a User
 func isUser(c *fiber.Ctx) error {
-
-	if CheckRole(c) != "user" {
-	  return fiber.ErrUnauthorized
+	user := c.Locals(userContextKey).(*UserData)
+	if user.Role != "user"{
+		return fiber.ErrUnauthorized
 	}
   
 	return c.Next()
 }
 
+func ExtractRoleFromJWT(c *fiber.Ctx) error {
+	user := c.Locals(userContextKey).(*UserData)
+	role := user.Role
+
+	jsonRole, err := json.Marshal(role)
+	if err != nil {
+		return c.Status(400).SendString(string(err.Error()))
+	}
+
+	return c.Status(200).SendString(string(jsonRole))
+}
+
+func ExtractUsernameFromJWT(c *fiber.Ctx) error {
+	user := c.Locals(userContextKey).(*UserData)
+	username := user.Username
+
+	jsonRole, err := json.Marshal(username)
+	if err != nil {
+		return c.Status(400).SendString(string(err.Error()))
+	}
+
+	return c.Status(200).SendString(string(jsonRole))
+}
+
 func CheckRole(c *fiber.Ctx) string {
+
 	cookie := c.Cookies("jwt")
 	if cookie == "" {
 		log.Fatal("Unauthorized1")
@@ -55,50 +82,32 @@ func CheckRole(c *fiber.Ctx) string {
 		log.Fatal("Unauthorized2")
 	}
 
-	var user UserData
+	// var user UserData
 
 	claims := token.Claims.(jwt.MapClaims)
-    user.Role = claims["role"].(string)
-	fmt.Println( claims)
+    // user.Role = claims["role"].(string)
 
-	return user.Role
+	return claims["role"].(string)
 }
+
+
 
 
 // extractUserFromJWT is a middleware that extracts user data from the JWT token
 func ExtractUserFromJWT(c *fiber.Ctx) error {
-	cookie := c.Cookies("jwt")
+	user := &UserData{}
 
-	secret := os.Getenv("JWT_SECRET")
+	// Extract the token from the Fiber context (inserted by the JWT middleware)
+	token := c.Locals("user").(*jwt.Token)
+	claims := token.Claims.(jwt.MapClaims)
 
-	_ , err := jwt.ParseWithClaims(cookie, &jwt.RegisteredClaims{}, func(token *jwt.Token) (interface{}, error) {
-		return []byte(secret), nil
-	})
-  
+	fmt.Println("Cookies : " ,claims)
 
-	if err != nil {
-		return c.SendStatus(fiber.StatusUnauthorized)
-	}
-	
-	// fmt.Println(token)
+	user.Username = claims["username"].(string)
+	user.Role = claims["role"].(string)
+
+	// Store the user data in the Fiber context
+	c.Locals(userContextKey, user)
 
 	return c.Next()
-
 }
-// func extractUserFromJWT(c *fiber.Ctx) error {
-// 	user := &UserData{}
-
-// 	// Extract the token from the Fiber context (inserted by the JWT middleware)
-// 	token := c.Locals("user").(*jwt.Token)
-// 	claims := token.Claims.(jwt.MapClaims)
-
-// 	fmt.Println(claims)
-
-// 	user.Username = claims["username"].(string)
-// 	user.Role = claims["role"].(string)
-
-// 	// Store the user data in the Fiber context
-// 	c.Locals(userContextKey, user)
-
-// 	return c.Next()
-// }

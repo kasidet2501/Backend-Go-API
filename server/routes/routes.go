@@ -2,7 +2,6 @@ package routes
 
 import (
 	"backend-ecom/controllers/authlogin"
-	"backend-ecom/controllers/cart"
 	"backend-ecom/controllers/logout"
 	"backend-ecom/controllers/order"
 	"backend-ecom/controllers/product"
@@ -10,6 +9,7 @@ import (
 	"backend-ecom/controllers/user"
 	"os"
 
+	jwtware "github.com/gofiber/contrib/jwt"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -33,18 +33,19 @@ func ProductsRoute(app *fiber.App){
 
 	// -------------------> Routes for User role <------------------------
 	// Group routes under /user
-	UserProductGroup := app.Group("/user")
+	// UserProductGroup := app.Group("/user")
+	// // Apply the isUser middleware only to the /product routes
+	// // UserProductGroup.Use(isUser)
 
-	// Apply the isUser middleware only to the /product routes
-	UserProductGroup.Use(isUser)
-
-	UserProductGroup.Get("/product", product.GetProduct)
-	UserProductGroup.Get("/product/:id", product.GetProductById)
+	// UserProductGroup.Get("/product", product.GetProduct)
+	// UserProductGroup.Get("/product/:id", product.GetProductById)
 }
 func UsersRoute(app *fiber.App){
 
 	// Group routes under /user
 	userGroup := app.Group("/user")
+
+	userGroup.Get("/:user", user.GetUserByUsername)
 
 	// Apply the isAdmin middleware only to the /user routes
 	userGroup.Use(isAdmin)
@@ -58,15 +59,16 @@ func UsersRoute(app *fiber.App){
 }
 
 func CartRoute(app *fiber.App){
-	// Group routes under /cart
-	CartGroup := app.Group("/cart")
+	// // Group routes under /cart
+	// CartGroup := app.Group("/cart")
 
-	// Apply the isUser middleware only to the /cart routes
-	CartGroup.Use(isUser)
+	// // Apply the isUser middleware only to the /cart routes
+	// CartGroup.Use(isUser)
 
-	CartGroup.Post("/", cart.AddToCart)
-	CartGroup.Post("/reduce", cart.ReduceQuantity)
-	CartGroup.Delete("/:id", cart.DeleteItem)
+	// CartGroup.Get("/", cart.GetCarts)
+	// CartGroup.Post("/", cart.AddToCart)
+	// CartGroup.Post("/reduce", cart.ReduceQuantity)
+	// CartGroup.Delete("/:id", cart.DeleteItem)
 
 }
 func OrderRoute(app *fiber.App){
@@ -76,7 +78,7 @@ func OrderRoute(app *fiber.App){
 	// Apply the isUser middleware only to the /order routes
 	OrderGroup.Use(isUser)
 
-	OrderGroup.Get("/", order.ConfirmOrder)
+	OrderGroup.Post("/", order.ConfirmOrder)
 	// OrderGroup.Get("/pd", order.GetSumPrice)
 
 }
@@ -89,8 +91,21 @@ func RegisterRoute(app *fiber.App){
 }
 
 func LoginRoute(app *fiber.App){
+
+	app.Get("/user/product", product.GetProduct)
+	app.Get("/user/product/:id", product.GetProductById)
+
 	app.Post("/login", authlogin.Login(os.Getenv("JWT_SECRET")))
+
+	// JWT Middleware
+	app.Use(jwtware.New(jwtware.Config{
+        SigningKey: jwtware.SigningKey{Key: []byte(os.Getenv("JWT_SECRET"))},
+    }))
+
 	app.Use(ExtractUserFromJWT)
+
+	app.Get("/role", ExtractRoleFromJWT)
+	app.Get("/username", ExtractUsernameFromJWT)
 }
 
 func LogoutRoute(app *fiber.App){

@@ -5,6 +5,7 @@ import (
 	"backend-ecom/models"
 	"backend-ecom/responses"
 	"context"
+	"encoding/json"
 	"net/http"
 	"time"
 
@@ -49,7 +50,10 @@ func Login(secretKey string) fiber.Handler {
 		
 		}
 
-		if ((request.Username != user.Username) || !(CheckPasswordHash(request.Password, user.Password))) {
+		
+		match := CheckPasswordHash(request.Password, user.Password)
+		// fmt.Println(match)
+		if ((request.Username != user.Username) || (match != true)) {
 			return fiber.ErrUnauthorized
 		}
 
@@ -69,16 +73,15 @@ func Login(secretKey string) fiber.Handler {
 		  return c.SendStatus(fiber.StatusInternalServerError)
 		}
 
-		c.Cookie(&fiber.Cookie{
-			Name:     "jwt",
-			Value:    t,
-			Expires:  time.Now().Add(time.Hour * 24),
-			HTTPOnly: true,
-		})
+		// c.Cookie(&fiber.Cookie{
+		// 	Name:     "jwt",
+		// 	Value:    t,
+		// 	Expires:  time.Now().Add(time.Hour * 24),
+		// 	HTTPOnly: true,
+		// })
 
-		return c.JSON(fiber.Map{
-			"Message": "Login success",
-			"token": t})
+		jsonJWT, err := json.Marshal(t)
+		return c.Status(200).SendString(string(jsonJWT))
 	}
 }
 

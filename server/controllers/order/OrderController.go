@@ -3,14 +3,14 @@ package order
 import (
 	"backend-ecom/configs"
 	"backend-ecom/models"
+	"backend-ecom/responses"
 	"context"
 	"log"
-	"os"
+	"net/http"
 	"time"
 
 	// "github.com/dgrijalva/jwt-go"
 	"github.com/gofiber/fiber/v2"
-	"github.com/golang-jwt/jwt/v5"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -27,85 +27,100 @@ type UserClaims struct {
 	Role   string `json:"role"`
 }
 
-func GetUsername(c *fiber.Ctx) (string){
-	cookie := c.Cookies("jwt")
-	if cookie == "" {
-		log.Fatal("Unauthorized1")
-	}
 
-	secret := os.Getenv("JWT_SECRET")
+// func GetUsername(c *fiber.Ctx) (string){
+// 	cookie := c.Cookies("jwt")
+// 	if cookie == "" {
+// 		log.Fatal("Unauthorized1")
+// 	}
 
-	token, err := jwt.Parse(cookie, func(token *jwt.Token) (interface{}, error) {
-        return []byte(secret), nil
-    })
+// 	secret := os.Getenv("JWT_SECRET")
 
-	// ตรวจสอบว่าการ Parse สำเร็จหรือไม่
-	if err != nil {
-		log.Fatal("Unauthorized2")
-	}
+// 	token, err := jwt.Parse(cookie, func(token *jwt.Token) (interface{}, error) {
+//         return []byte(secret), nil
+//     })
 
-	var user models.UserData
+// 	// ตรวจสอบว่าการ Parse สำเร็จหรือไม่
+// 	if err != nil {
+// 		log.Fatal("Unauthorized2")
+// 	}
 
-	claims := token.Claims.(jwt.MapClaims)
-    user.Username = claims["username"].(string)
+// 	var user models.UserData
 
-	return user.Username
+// 	claims := token.Claims.(jwt.MapClaims)
+//     user.Username = claims["username"].(string)
 
-}
+// 	return user.Username
+
+// }
 
 
 func ConfirmOrder(c *fiber.Ctx) error{
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	
+	var orderUser models.Order
 	defer cancel()
 
-	// Find all documents in the collection
-	var carts []models.CartItem = getCarts()
+	//validate the request body
+	if err:= c.BodyParser(&orderUser); err != nil{
+		return c.Status(http.StatusBadRequest).JSON(responses.ResponseData{
+			Status: http.StatusBadRequest, 
+			Message:  "error", 
+			Data: &fiber.Map{"data": err.Error()}})
+	}
+
+	// // Find all documents in the collection
+	// var carts []models.CartItem = getCarts()
 
 	// get username from JWT toke
-	usernameJWT := GetUsername(c)
+	// usernameJWT := GetUsername(c)
 
-	// สร้าง Order
-	filter := bson.M{"username": usernameJWT}
-	var order models.Order
-	err := OrderCollection.FindOne(ctx, filter).Decode(&order)
+	// // สร้าง Order
+	// filter := bson.M{"username": usernameJWT}
+	var orders models.Order
+	// err := OrderCollection.FindOne(ctx, filter).Decode(&orders)
 
 
-	// Check if nothing in the cart
-	// ใช้ CountDocuments เพื่อนับจำนวนเอกสารทั้งหมดใน Collection
-	count, err := CartCollection.CountDocuments(ctx, bson.M{})
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to count item in cart"})
-	}
-	// ถ้าไม่มีเอกสาร
-	if count == 0 {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Unable to confirm order because you do not have any products in your shopping cart."})
-	}
+	// // Check if nothing in the cart
+	// // ใช้ CountDocuments เพื่อนับจำนวนเอกสารทั้งหมดใน Collection
+	// count, err := CartCollection.CountDocuments(ctx, bson.M{})
+	// if err != nil {
+	// 	return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to count item in cart"})
+	// }
+	// // ถ้าไม่มีเอกสาร
+	// if count == 0 {
+	// 	return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Unable to confirm order because you do not have any products in your shopping cart."})
+	// }
 
 	//format time
 	currentTime := time.Now()
 	formattedTime := currentTime.Format("2006-01-02 15:04:05")
 
 	// กรณีไม่พบ Order ใน MongoDB
-	price:= GetSumPrice() // Sum total price
-	order = models.Order{
+	// price:= GetSumPrice() // Sum total price
+	orders = models.Order{
 		Id: primitive.NewObjectID(),
-		Username:  usernameJWT,
-		Carts: carts,
-		Price: price,
+		Username:  orderUser.Username,
+		Firstname:  orderUser.Firstname,
+		Lastname:  orderUser.Lastname,
+		Email:  orderUser.Email,
+		Address:  orderUser.Address,
+		Carts: orderUser.Carts,
+		Price: orderUser.Price,
 		Date: formattedTime,
 	}
 	// insert Cart item into Order
-	_, err = OrderCollection.InsertOne(ctx, order)
+	_, err := OrderCollection.InsertOne(ctx, orders)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to add item to cart"})
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to add item to order"})
 	}
 
-	// Clear item in Cart
-	if _, err := CartCollection.DeleteMany(ctx, bson.M{}); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to clear item in cart"})
-	}
+	// // Clear item in Cart
+	// if _, err := CartCollection.DeleteMany(ctx, bson.M{}); err != nil {
+	// 	return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to clear item in cart"})
+	// }
 
-	return c.JSON(fiber.Map{"data": order})
+	return c.JSON(fiber.Map{"data": orders})
 }
 
 func getCarts() []models.CartItem {

@@ -5,6 +5,7 @@ import (
 	"backend-ecom/models"
 	"backend-ecom/responses"
 	"context"
+	"encoding/json"
 	"net/http"
 	"time"
 
@@ -83,6 +84,29 @@ func HashPassword(password string) (string, error) {
 func CheckPasswordHash(password, hash string) bool {
     err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
     return err == nil
+}
+
+// -----------------> Get User By Username <----------------- //
+func GetUserByUsername(c *fiber.Ctx) error{
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	Username := c.Params("user")
+	var user models.User
+	defer cancel()
+
+
+	// err := UserCollection.FindOne(ctx, bson.M{"username" : UserId}).Decode(&user)
+	err := UserCollection.FindOne(ctx, bson.M{"username" : Username}).Decode(&user)
+
+	if err != nil{
+		return c.Status(http.StatusInternalServerError).JSON(responses.ResponseData{
+			Status: http.StatusInternalServerError, 
+			Message:  "error", 
+			Data: &fiber.Map{"data": err.Error()}})
+	
+	}
+	jsonUser, err := json.Marshal(user)
+
+	return c.Status(200).SendString(string(jsonUser))
 }
 
 
@@ -188,7 +212,6 @@ func EditUser(c *fiber.Ctx) error{
 			"firstname": user.Name.Firstname,
 			"lastname": user.Name.Lastname,
 		},
-		"phone": user.Phone,
 	}
 
 	result,err := UserCollection.UpdateOne(ctx, bson.M{"id" : ObjId}, bson.M{"$set": update})

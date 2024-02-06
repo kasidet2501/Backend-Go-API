@@ -5,6 +5,8 @@ import (
 	"backend-ecom/models"
 	"backend-ecom/responses"
 	"context"
+	"encoding/json"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -89,9 +91,11 @@ func Register(c *fiber.Ctx) error{
 			Message:  "error", 
 			Data: &fiber.Map{"data": err.Error()}})
 	}
-
-	return c.Status(http.StatusCreated).JSON(responses.ResponseData{
-		Status: http.StatusCreated, 
-		Message:  "success", 
-		Data: &fiber.Map{"data": result}})
+	json, err := json.Marshal(result)
+	fmt.Println(result)
+	return c.Status(200).SendString(string(json))
+	// return c.Status(200).JSON(responses.ResponseData{
+	// 	Status: http.StatusCreated, 
+	// 	Message:  "success", 
+	// 	Data: &fiber.Map{"data": result}})
 }

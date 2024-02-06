@@ -36,20 +36,32 @@ type User struct {
 	Username 	string  	`json:"username,omitempty" validate:"required"`
 	Password 	string  	`json:"password,omitempty" validate:"required"`
 	Name     	Name    	`json:"name,omitempty" validate:"required"`
-	Phone    	string  	`json:"phone,omitempty" validate:"required"`
 }
 
 
 //Cart
+// type CartItem struct {
+// 	ProductID string 	`json:"productId"`
+// 	Quantity  int 		`json:"quantity"`
+// 	Price 	  float64		`json:"price"`
+// }
 type CartItem struct {
-	ProductID string 	`json:"productId"`
-	Quantity  int 		`json:"quantity"`
-	Price 	  float64		`json:"price"`
+	ProductID 	string 			   `json:"id"`
+	Title 		string             `json:"title"`
+	Price		float64			   `json:"price"`
+	Description	string             `json:"description"`
+	Category	string             `json:"category"`
+	Image		string             `json:"image"`
+	Qty  		int				   `json:"qty"`
 }
 
 type Order struct {
 	Id       primitive.ObjectID     `json:"id,omitempty"`
 	Username string       			`json:"username"`
+	Firstname string       			`json:"firstname"`
+	Lastname string       			`json:"lastname"`
+	Email string       				`json:"email"`
+	Address string       			`json:"address"`
 	Carts 	 []CartItem     		`json:"carts"`
 	Price 	 float64				`json:"price"`	
 	Date     string 		`json:"date"`
