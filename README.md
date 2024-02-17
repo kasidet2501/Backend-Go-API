@@ -18,7 +18,7 @@ This project is a backend application for an e-commerce platform developed using
 
 - [Middleware]() - Custom middleware functions are used to handle tasks such as access authentication.
 
-## Technology Stack
+## Tech Stack
 
 - **Backend (Go):**
 
